@@ -37,4 +37,39 @@ public class StudentService {
         }
         studentRepository.deleteById(studentId);
     }
+    
+    
+    // We have to annotate it with Transactional so we prevent multiple updates to the same records at the same time (using implicit locks)
+    @Transactional
+    public void updateStudent(Long studentId
+                             String name,
+                             String email
+                             ){
+        
+        Student student = studentRepository.updateById(studentId)
+                            .orElseThrow(() -> new IllegalStateException("Student with ID " + studentId + " Doesn't exist.") );
+        
+        if(
+            name != null &&
+            name.length > 0 &&
+            !Object.equals(student.getName(),name)
+            ) 
+        {
+            student.setName(name);
+        }
+        
+        if(
+            email != null &&
+            email.length > 0 &&
+            !Object.equals(student.getEmail(),email)
+            ) 
+        {            
+            Optional<Student> optStudent = studentRepository.findByEmail(email);
+            if( optStudent.isPresent()){
+                throw new IllegalStateException("Email is Already Taken");
+            }
+            student.setEmail(email);       
+        }
+        
+    }
 }
